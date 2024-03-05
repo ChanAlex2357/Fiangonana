@@ -45,8 +45,11 @@ class DataAccess :
 		self._password=password
 
 	def getUrlConnection(self):
-		return 'DRIVER={SQL Server};'f"SERVER=DESKTOP-JCA;DATABASE={self.getDatabase_name()};Trusted_Connection=yes;"
+		return 'DRIVER={SQL Server};'f"SERVER=DESKTOP-JCA;DATABASE={self.getDatabase_name()};Trusted_Connection=yes;username=DESKTOP-JCA\JACQUES Chan;password="
 
 	def getConnection(self):
 		data = pyodbc.connect(self.getUrlConnection())
 		return data
+	def getFiangonanaConnection():
+		db = DataAccess("Fiangonana")
+		return db.getConnection()

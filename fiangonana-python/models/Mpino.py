@@ -1,3 +1,4 @@
+from helpers.database import DataAccess
 class Mpino :
 	def __init__(self	,nom	,login	,password):
 		self.setNom(nom)
@@ -24,3 +25,13 @@ class Mpino :
 
 	def setPassword(self,password):
 		self._password=password
+
+	def authentification(login , password):
+		# Connexion a la base de donnee
+		conn = DataAccess.getFiangonanaConnection()
+		cursor = conn.cursor()
+		sql = "select * from Mpino where login = ? AND password = ?"
+
+		cursor.execute(sql,(login,password))
+		row = cursor.fetchone()
+		
