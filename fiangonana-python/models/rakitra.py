@@ -85,3 +85,19 @@ class Rakitra :
 			cursor.close()
 			conn.close()
 		return rakitra
+
+	def save(self):
+		boolean = False
+		# Execution du sql
+		conn = db.getFiangonanaConnection()
+		cursor = conn.cursor()
+		try :
+			cursor.execute(f"insert into Rakitra (montant,dateDepot) values(?,?)" , [(self.get_montant()),(self.get_date_depot()),])
+			conn.commit()
+			boolean = True
+		except pyodbc.Error as err:
+			print(err)
+			conn.rollback()
+		finally :
+			conn.close()
+		return boolean

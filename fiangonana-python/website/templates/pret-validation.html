@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}
+    - Validation
+{% endblock %}
+
+{% block body_content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-6-md mx-auto">
+                <form action="/actions/valider-pret" id="mpino-form" method="POST" class="mt-3">
+                    <input type="hidden" name="idMpino" value="{{ pret.get_id_mpino() }}">
+                    <input type="hidden" id="date-input" name="datePret" required class="form-control " value="{{ pret.get_date_pret() }}">
+                    <input type="hidden" id="montant-input" name="montant" required class="form-control" value="{{ pret.get_montant() }}">
+
+                    <div class="card text-center">
+                        <div class="card-header">
+                            <h3>Etes-vous sur de votre demande?</h3>
+                            <p>Voici une proposition de date de pret a laquelle votre somme sera possible a etre recuperer</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-text">
+                                <p> <b>Date de pret : </b>{{ pret.get_date_pret() }}</p>
+                                <p> <b>Montant demander : </b>{{ pret.get_montant() }}</p>
+                                <p> <b>Votre numero : </b>{{ pret.get_id_mpino() }}</p>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-success" id="valider-button">Valider</button>
+                            <a href="/pret-demande/{{ pret.get_id_mpino() }}" class="btn btn-danger">Annuler</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

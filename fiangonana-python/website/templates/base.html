@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static' , filename='css/bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static' , filename='font/bootstrap-icons.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static' , filename='main.css')}}">
+    <title>Fiangonana {% block title %}{% endblock %}</title>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="navbar navbar-dark navbar-expand-lg bg-dark ">
+            <div class="container">
+                <a href="/" class="navbar-brand bg-primary rounded px-3 text-uppercase fw-bold">Fiangonana</a>
+                <div class="d-flex justify-content-end">
+                    <button
+                        class="navbar-toggler" 
+                        type="button" 
+                        data-toggle="collapse" 
+                        data-target="#navbar"
+                    > 
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbar">
+                        <div class="navbar-nav">
+                            <a href="/rakitra-insertion" class="nav-item nav-link" id="rakitra-insertion" >Insertion Rakitra</a>
+                            <a href="/pret-demande/0" class="nav-item nav-link" id="pret">Demander un pret</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </nav>
+    </header>
+    <section id="main">
+        {% block body_content %}
+            
+        {% endblock %}
+    </section>
+    <!-- Footer -->
+    <footer></footer>
+
+    <script src="{{ url_for('static' , filename='js/bootstrap.bundle.min.js')}}"></script>
+    <script src="{{ url_for('static' , filename='js/bootstrap.esm.min.js')}}"></script>
+    <script src="{{ url_for('static' , filename='js/bootstrap.min.js')}}"></script>
+</body>
+</html>

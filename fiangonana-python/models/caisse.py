@@ -8,11 +8,10 @@ def get_date_dispo():
     conn = DataAccess.getFiangonanaConnection()
     cursor = conn.cursor()
     
-    cursor.execute("select date_dispo from caisse")
+    cursor.execute("select date_dispo from v_caisse")
     row = cursor.fetchone()
     date_dispo = datetime.strptime(row.date_dispo,'%Y-%m-%d')
     curr = Alahady(date_reel=date_dispo.date())
-    curr.show()
     curr.next()
     return curr
 
@@ -21,7 +20,7 @@ def get_montant():
     conn = DataAccess.getFiangonanaConnection()
     cursor = conn.cursor()
     
-    cursor.execute("select montant_actuelle from caisse")
+    cursor.execute("select montant_actuelle from v_caisse")
     row = cursor.fetchone()
 
     montant = int(row.montant_actuelle)

@@ -6,6 +6,7 @@ class DataAccess :
 		self.setDatabase_name(database_name)
 		self.setUsername(username)
 		self.setPassword(password)
+
 	def __init__ (self,database_name):
 		self.setDatabase_name(database_name)
 #Getteurs and Setteurs

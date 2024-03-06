@@ -2,9 +2,12 @@ from datetime import date , datetime , timedelta
 from models.alahady import Alahady
 from models.rakitra import Rakitra
 from models import caisse
+import pyodbc
+from helpers import dates , database as db
+
 import math
 class Pret :
-	def __init__(self,id_pret,date_pret,montant,id_mpino):
+	def __init__(self,id_pret : None , date_pret : [str,date],montant,id_mpino : int):
 		self.set_id_pret(id_pret)
 		self.set_date_pret(date_pret)
 		self.set_montant(montant)
@@ -21,8 +24,15 @@ class Pret :
 	def get_date_pret(self):
 		return self._date_pret
 
-	def set_date_pret(self,date_pret):
-		self._date_pret=date_pret
+	def set_date_pret(self,date_pret : [str,date]):
+		dd = date_pret
+		try :
+			dd = dates.string_to_date(date_pret)
+			print("transfo")
+		except Exception as e:
+			print(e)
+			print("Date pret is not a String")
+		self._date_pret=dd
 
 	#montant
 	def get_montant(self):
@@ -38,6 +48,8 @@ class Pret :
 	def set_id_mpino(self,id_mpino):
 		self._id_mpino=id_mpino
 
+	def show(self):
+		print(f"[{self.get_id_pret()}] {self.get_date_pret()} ~ {self.get_montant()}")
 # Functionalities
 	def get_intervalle_debut(current_dimanche):
 		# numero de la date de demande
@@ -69,13 +81,24 @@ class Pret :
 
 	def get_date_pret_valide(rakitra_annee ,rakitra_ref,date_base ,montant_depart,montant_final,poucentage):
 		total = montant_depart
+		year = date_base.get_annee()
 		while(total < montant_final):
+			date_base.show()
+			# Traitement du changement annee
+			# next_year = date_base.get_annee()
+			# if next_year != year :
+			# 	Pret.get_date_pret_valide([] , rakitra_annee , date_base , montant_depart , montant_final , poucentage)
+			# 	pass
 			mnt = Pret.calcul_prevision(rakitra_ref,date_base,poucentage)
+			rk = Rakitra(0,date_depot=date_base.get_date_reel() , montant=mnt)
+			rk.show()
+			rakitra_annee.append( rk )
 			total += mnt
 			date_base.next()
 		date_base.previous()
+
 	
-	def demander_pret(date_demande : date , montant):
+	def demander_pret( id_mpino ,date_demande : date , montant):
 		year = date_demande.year
 		current_dimanche = Alahady.get_closest_alahady(date_base=date_demande)
 
@@ -89,9 +112,26 @@ class Pret :
 		# Calcul du pourcentage
 		poucentage = Pret.calcule_pourcentage(rakitra_annee , rakitra_ref , intervalle)
 		temp_somme = caisse.get_montant()
-
+		print(f"poucentage == {poucentage}")
+		if temp_somme < montant :
+			current_dimanche = caisse.get_date_dispo()
   		# Calcul des previsions
-		current_dimanche.next()
 		Pret.get_date_pret_valide(rakitra_annee,rakitra_ref,current_dimanche,temp_somme,montant,poucentage)
 
-		return current_dimanche
+		result = Pret( id_pret=0 , date_pret=current_dimanche.get_date_reel() , montant=montant , id_mpino=id_mpino)
+		return result
+
+	def valider(self):
+		# connexion base de donner Fiangonana
+		fiangoana_db = db.DataAccess("Fiangonana")
+		sql = f"Insert into Pret(datePret,montant,idMpino) values ('{self.get_date_pret()}' , {self.get_montant()} , {self.get_id_mpino()})"
+		# Execution du sql
+		conn = fiangoana_db.getConnection()
+		cursor = conn.cursor()
+		try :
+			cursor.execute(sql)
+			conn.commit()
+		except pyodbc.Error:
+			conn.rolleback()
+		finally :
+			conn.close()
