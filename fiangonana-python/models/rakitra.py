@@ -1,7 +1,7 @@
 from helpers.database import DataAccess as db
 import pyodbc
 from datetime import date , datetime , timedelta
-import models.alahady as m_alahady
+from models.alahady import Alahady
 
 class Rakitra :
 	def __init__(self,id_rakitra = None, date_depot = None ,montant = None):
@@ -64,14 +64,10 @@ class Rakitra :
 		return list_rakitra
 	# Recuperer le rakitra selon un nemero et une date donnee
 	def get_rakitra_of( id_dimanche , year):
-		rakitra = Rakitra()
-		date_rk = m_alahady.Alahady.get_date_dimanche_of(id_dimanche,year)
-
-		# connexion base de donner Fiangonana
-		fiangoana_db = db.DataAccess("Fiangonana")
-
+		date_rk = Alahady.get_date_dimanche_of(id_dimanche,year)
+		rakitra = Rakitra(0,date_rk,0)
 		# Execution du sql
-		conn = fiangoana_db.getConnection()
+		conn = db.getFiangonanaConnection()
 		cursor = conn.cursor()
 		try :
 			cursor.execute("select * from Rakitra Where dateDepot=?", (date_rk.strftime("%Y-%m-%d"),))

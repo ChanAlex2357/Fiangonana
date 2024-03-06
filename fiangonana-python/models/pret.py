@@ -74,9 +74,20 @@ class Pret :
 		return percent
 
 	def calcul_prevision(rakitra_ref,dimanche:Alahady , poucentage):
+		year = dimanche.get_annee()
+		year_ref = year - 1
 		id_dim = dimanche.get_id_dimanche()
-		ref_value = rakitra_ref[id_dim-1]
-		result = ref_value.get_montant()*poucentage
+		# Recuperer le rakitra reference
+		rk_ref = Rakitra.get_rakitra_of(id_dim,year_ref)
+		ref_value = 0
+		# y a pas de ref => atao prevision sinon montant de ref = montant
+		if rk_ref.get_id_rakitra() == 0:
+      
+			al_ref = Alahady(date_reel=rk_ref.get_date_depot())
+			ref_value = Pret.calcul_prevision(rakitra_ref,al_ref,poucentage)
+		else :
+			ref_value = rk_ref.get_montant()
+		result = ref_value*poucentage
 		return result
 
 	def get_date_pret_valide(rakitra_annee ,rakitra_ref,date_base ,montant_depart,montant_final,poucentage):
