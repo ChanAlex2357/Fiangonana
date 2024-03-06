@@ -12,16 +12,6 @@ views = Blueprint('views' , __name__)
 def home():
     return render_template("home.html")
 
-@views.route('rakitra-insertion' , methods = ['GET' , 'POST'])
-def rakitra_insertion():
-    if request.method == 'POST':
-        date_demande = request.form.get('dateDepot')
-        montant = request.form.get('montant')
-        state = Rakitra(0,date_demande , montant).save()
-        if state == False :
-            return redirect("/")
-    return render_template("rakitra-insertion.html")
-
 @views.route('mpino-login', methods=['GET','POST'])
 def mpino_login():
     if request.method == 'GET':
@@ -32,21 +22,8 @@ def mpino_login():
         
         auth = Mpino.authentification(login=login , password=password)
         if auth :
-            return redirect(f"/pret-demande/{auth.get_id_mpino()}")
+            return redirect(f"/pret/demande/{auth.get_id_mpino()}")
         else :
             return render_template("mpino-login.html")
     
 
-@views.route('pret-demande/<int:id_mpino>' , methods=['GET','POST'])
-def demander_pret(id_mpino):
-    if id_mpino <= 0 :
-        return redirect("/mpino-login")
-    if request.method == 'GET':
-        return render_template("pret-demande.html" , id_mpino = id_mpino)
-    elif request.method == 'POST':
-        date_demande = request.form.get('dateDemande')
-        montant = request.form.get('montant')
-        mpino = request.form.get('idMpino')
-        # Calcule de la date
-        pr = Pret.demander_pret(int(mpino),dates.string_to_date(date_demande),float(montant))
-        return render_template("pret-validation.html",pret=pr)

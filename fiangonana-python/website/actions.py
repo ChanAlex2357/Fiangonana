@@ -15,4 +15,4 @@ def valider():
         
         id_mpino = mpino
         Pret(0,date_pret,montant,mpino).valider()
-    return redirect(f"/pret-demande/{id_mpino}")
+    return redirect(f"/pret/demande/{id_mpino}")

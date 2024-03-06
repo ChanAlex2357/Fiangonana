@@ -95,11 +95,6 @@ class Pret :
 		year = date_base.get_annee()
 		while(total < montant_final):
 			date_base.show()
-			# Traitement du changement annee
-			# next_year = date_base.get_annee()
-			# if next_year != year :
-			# 	Pret.get_date_pret_valide([] , rakitra_annee , date_base , montant_depart , montant_final , poucentage)
-			# 	pass
 			mnt = Pret.calcul_prevision(rakitra_ref,date_base,poucentage)
 			rk = Rakitra(0,date_depot=date_base.get_date_reel() , montant=mnt)
 			rk.show()
@@ -112,7 +107,7 @@ class Pret :
 	def demander_pret( id_mpino ,date_demande : date , montant):
 		year = date_demande.year
 		current_dimanche = Alahady.get_closest_alahady(date_base=date_demande)
-
+		current_dimanche.show()
 		# Recuperer l'intervalle depuis debut de l'annee
 		intervalle = Pret.get_intervalle_debut(current_dimanche)
 
@@ -126,9 +121,10 @@ class Pret :
 		print(f"poucentage == {poucentage}")
 		if temp_somme < montant :
 			current_dimanche = caisse.get_date_dispo()
-  		# Calcul des previsions
-		Pret.get_date_pret_valide(rakitra_annee,rakitra_ref,current_dimanche,temp_somme,montant,poucentage)
-
+			# Calcul des previsions
+			Pret.get_date_pret_valide(rakitra_annee,rakitra_ref,current_dimanche,temp_somme,montant,poucentage)
+		else :
+			current_dimanche.next()
 		result = Pret( id_pret=0 , date_pret=current_dimanche.get_date_reel() , montant=montant , id_mpino=id_mpino)
 		return result
 
