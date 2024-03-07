@@ -1,7 +1,7 @@
 from helpers.database import DataAccess as db
 import pyodbc
 from datetime import date , datetime , timedelta
-from models.alahady import Alahady
+from .alahady import Alahady
 
 class Rakitra :
 	def __init__(self,id_rakitra = None, date_depot = None ,montant = None):
@@ -97,3 +97,42 @@ class Rakitra :
 		finally :
 			conn.close()
 		return boolean
+
+	def get_moyenne_predictive(id_dimanche : int , annee : int):
+		annee_1 = annee - 1
+		annee_2 = annee - 2
+		result = 0
+		sql = "select AVG(montant) as moyenne from Rakitra where (annee = ? OR annee = ?) AND (numSemaine = ?)  group by numSemaine"
+  
+		conn = db.getFiangonanaConnection()
+		cursor = conn.cursor()
+		try :
+			cursor.execute(sql , [(annee_1),(annee_2),(id_dimanche),])
+			row = cursor.fetchone()	
+			result = row.moyenne
+		except pyodbc.Error as err:
+			print(err)
+			conn.rollback()
+		finally :
+			conn.close()
+		return result
+  
+	def get_moyenne_variation(annee : int):
+		annee_1 = annee - 1
+		annee_2 = annee - 2
+		result = 0
+		sql = "select AVG(variation) as moyenne_variation from (select tb1.numSemaine,moyenne , montant , montant/moyenne as variation from (select numSemaine , montant From Rakitra where annee = ? ) as tb1  join (select numSemaine , AVG(montant) as moyenne from Rakitra where (annee = ? OR annee = ?)  group by numSemaine) as tb2 on tb1.numSemaine = tb2.numSemaine) as tb"
+		
+		conn = db.getFiangonanaConnection()
+		cursor = conn.cursor()
+		try :
+			cursor.execute(sql , [(annee),(annee_1),(annee_2),])
+			row = cursor.fetchone()	
+			result = row.moyenne_variation
+		except pyodbc.Error as err:
+			print(err)
+			conn.rollback()
+		finally :
+			conn.close()
+		return result
+  

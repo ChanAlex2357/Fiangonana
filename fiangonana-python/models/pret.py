@@ -1,6 +1,6 @@
 from datetime import date , datetime , timedelta
-from models.alahady import Alahady
-from models.rakitra import Rakitra
+from .alahady import Alahady
+from .rakitra import Rakitra
 from models import caisse
 import pyodbc
 from helpers import dates , database as db
@@ -90,7 +90,7 @@ class Pret :
 		result = ref_value*poucentage
 		return result
 
-	def get_date_pret_valide(rakitra_annee ,rakitra_ref,date_base ,montant_depart,montant_final,poucentage):
+	def get_date_pret_valide(date_base ,montant_depart,montant_final,poucentage):
 		total = montant_depart
 		year = date_base.get_annee()
 		while(total < montant_final):
@@ -98,7 +98,6 @@ class Pret :
 			mnt = Pret.calcul_prevision(rakitra_ref,date_base,poucentage)
 			rk = Rakitra(0,date_depot=date_base.get_date_reel() , montant=mnt)
 			rk.show()
-			rakitra_annee.append( rk )
 			total += mnt
 			date_base.next()
 		date_base.previous()
@@ -106,26 +105,29 @@ class Pret :
 	
 	def demander_pret( id_mpino ,date_demande : date , montant):
 		year = date_demande.year
-		current_dimanche = Alahady.get_closest_alahady(date_base=date_demande)
-		current_dimanche.show()
-		# Recuperer l'intervalle depuis debut de l'annee
-		intervalle = Pret.get_intervalle_debut(current_dimanche)
+		lundi = None
+		# # Recuperer l'intervalle depuis debut de l'annee
+		# intervalle = Pret.get_intervalle_debut(current_dimanche)
 
-		# Recuperer les rakitra des annees utils
-		rakitra_annee = Rakitra.get_all_rakitra_of_year(year)
-		rakitra_ref = Rakitra.get_all_rakitra_of_year(year-1)
+		# # Recuperer les rakitra des annees utils
+		# rakitra_annee = Rakitra.get_all_rakitra_of_year(year)
+		# rakitra_ref = Rakitra.get_all_rakitra_of_year(year-1)
 
 		# Calcul du pourcentage
-		poucentage = Pret.calcule_pourcentage(rakitra_annee , rakitra_ref , intervalle)
+		poucentage = Rakitra.get_moyenne_variation(year)
 		temp_somme = caisse.get_montant()
 		print(f"poucentage == {poucentage}")
+		current_dimanche = caisse.get_date_dispo()
 		if temp_somme < montant :
-			current_dimanche = caisse.get_date_dispo()
+			current_dimanche.next()
 			# Calcul des previsions
-			Pret.get_date_pret_valide(rakitra_annee,rakitra_ref,current_dimanche,temp_somme,montant,poucentage)
+			Pret.get_date_pret_valide(current_dimanche,temp_somme,montant,poucentage)
 		else :
 			current_dimanche.next()
-		result = Pret( id_pret=0 , date_pret=current_dimanche.get_date_reel() , montant=montant , id_mpino=id_mpino)
+		# recuperer le lundi manaraka
+		lundi = current_dimanche.get_date_reel() + timedelta(days=1)
+		
+		result = Pret( id_pret=0 , date_pret=lundi , montant=montant , id_mpino=id_mpino)
 		return result
 
 	def valider(self):
