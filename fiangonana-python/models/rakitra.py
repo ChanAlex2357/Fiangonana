@@ -1,7 +1,7 @@
 from helpers.database import DataAccess as db
 import pyodbc
 from datetime import date , datetime , timedelta
-import models.alahady as m_alahady
+from .alahady import Alahady
 
 class Rakitra :
 	def __init__(self,id_rakitra = None, date_depot = None ,montant = None):
@@ -64,14 +64,10 @@ class Rakitra :
 		return list_rakitra
 	# Recuperer le rakitra selon un nemero et une date donnee
 	def get_rakitra_of( id_dimanche , year):
-		rakitra = Rakitra()
-		date_rk = m_alahady.Alahady.get_date_dimanche_of(id_dimanche,year)
-
-		# connexion base de donner Fiangonana
-		fiangoana_db = db.DataAccess("Fiangonana")
-
+		date_rk = Alahady.get_date_dimanche_of(id_dimanche,year)
+		rakitra = Rakitra(0,date_rk,0)
 		# Execution du sql
-		conn = fiangoana_db.getConnection()
+		conn = db.getFiangonanaConnection()
 		cursor = conn.cursor()
 		try :
 			cursor.execute("select * from Rakitra Where dateDepot=?", (date_rk.strftime("%Y-%m-%d"),))
@@ -101,3 +97,42 @@ class Rakitra :
 		finally :
 			conn.close()
 		return boolean
+
+	def get_moyenne_predictive(id_dimanche : int , annee : int):
+		annee_1 = annee - 1
+		annee_2 = annee - 2
+		result = 0
+		sql = "select AVG(montant) as moyenne from Rakitra where (annee = ? OR annee = ?) AND (numSemaine = ?)  group by numSemaine"
+  
+		conn = db.getFiangonanaConnection()
+		cursor = conn.cursor()
+		try :
+			cursor.execute(sql , [(annee_1),(annee_2),(id_dimanche),])
+			row = cursor.fetchone()	
+			result = row.moyenne
+		except pyodbc.Error as err:
+			print(err)
+			conn.rollback()
+		finally :
+			conn.close()
+		return result
+  
+	def get_moyenne_variation(annee : int):
+		annee_1 = annee - 1
+		annee_2 = annee - 2
+		result = 0
+		sql = "select AVG(variation) as moyenne_variation from (select tb1.numSemaine,moyenne , montant , montant/moyenne as variation from (select numSemaine , montant From Rakitra where annee = ? ) as tb1  join (select numSemaine , AVG(montant) as moyenne from Rakitra where (annee = ? OR annee = ?)  group by numSemaine) as tb2 on tb1.numSemaine = tb2.numSemaine) as tb"
+		
+		conn = db.getFiangonanaConnection()
+		cursor = conn.cursor()
+		try :
+			cursor.execute(sql , [(annee),(annee_1),(annee_2),])
+			row = cursor.fetchone()	
+			result = row.moyenne_variation
+		except pyodbc.Error as err:
+			print(err)
+			conn.rollback()
+		finally :
+			conn.close()
+		return result
+  

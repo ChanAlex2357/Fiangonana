@@ -87,6 +87,7 @@ class Alahady :
 	
 	""" Permet d'avoir le numero de dimanche d'une date donnee """	
 	def get_id_dimanche_by_date(ddate):
+
 		if ddate.weekday() == 6:  # Vérifier si la ddate est un dimanche (0 pour lundi, 6 pour dimanche)
 			# Trouver le premier dimanche de l'année
 			first_day = date(ddate.year, 1, 1)

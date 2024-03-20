@@ -21,8 +21,14 @@ CREATE TABLE Rakitra(
    idRakitra INT IDENTITY(1,1),
    montant DECIMAL NOT NULL,
    dateDepot DATE NOT NULL,
+   numSemaine INT NOT NULL ,
+   annee INT NOT NULL ,
    PRIMARY KEY(idRakitra),
    UNIQUE(dateDepot)
+);
+create TABLE Caisse(
+    montant_actuelle DECIMAL NOT NULL ,
+    date_pret_valide DATE
 );
 
 -- Insertion de données pour l'année 2022
