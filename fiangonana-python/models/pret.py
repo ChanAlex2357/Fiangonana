@@ -3,6 +3,7 @@ from .alahady import Alahady
 from .rakitra import Rakitra
 from models import caisse
 import pyodbc
+from decimal import Decimal
 from helpers import dates , database as db
 
 import math
@@ -12,6 +13,7 @@ class Pret :
 		self.set_date_pret(date_pret)
 		self.set_montant(montant)
 		self.set_id_mpino(id_mpino)
+		self.reste = 0
 #Getteurs and Setteurs
 	#id_pret
 	def get_id_pret(self):
@@ -50,6 +52,7 @@ class Pret :
 
 	def show(self):
 		print(f"[{self.get_id_pret()}] {self.get_date_pret()} ~ {self.get_montant()}")
+		print(f"reste == {self.reste}")
 # Functionalities
 	def get_intervalle_debut(current_dimanche):
 		# numero de la date de demande
@@ -73,20 +76,10 @@ class Pret :
 		percent = (sum_current / sum_ref )
 		return percent
 
-	def calcul_prevision(rakitra_ref,dimanche:Alahady , poucentage):
+	def calcul_prevision(dimanche:Alahady , poucentage):
 		year = dimanche.get_annee()
-		year_ref = year - 1
 		id_dim = dimanche.get_id_dimanche()
-		# Recuperer le rakitra reference
-		rk_ref = Rakitra.get_rakitra_of(id_dim,year_ref)
-		ref_value = 0
-		# y a pas de ref => atao prevision sinon montant de ref = montant
-		if rk_ref.get_id_rakitra() == 0:
-      
-			al_ref = Alahady(date_reel=rk_ref.get_date_depot())
-			ref_value = Pret.calcul_prevision(rakitra_ref,al_ref,poucentage)
-		else :
-			ref_value = rk_ref.get_montant()
+		ref_value = Rakitra.get_moyenne_predictive(id_dim,year)
 		result = ref_value*poucentage
 		return result
 
@@ -95,15 +88,18 @@ class Pret :
 		year = date_base.get_annee()
 		while(total < montant_final):
 			date_base.show()
-			mnt = Pret.calcul_prevision(rakitra_ref,date_base,poucentage)
+			mnt = Pret.calcul_prevision(date_base,poucentage)
 			rk = Rakitra(0,date_depot=date_base.get_date_reel() , montant=mnt)
 			rk.show()
 			total += mnt
 			date_base.next()
+		reste = total - Decimal(montant_final)
 		date_base.previous()
-
+		return reste
 	
 	def demander_pret( id_mpino ,date_demande : date , montant):
+		if( date_demande == None) :
+			date_demande = datetime.now().date()
 		year = date_demande.year
 		lundi = None
 		# # Recuperer l'intervalle depuis debut de l'annee
@@ -118,16 +114,17 @@ class Pret :
 		temp_somme = caisse.get_montant()
 		print(f"poucentage == {poucentage}")
 		current_dimanche = caisse.get_date_dispo()
+		reste = 0
 		if temp_somme < montant :
-			current_dimanche.next()
 			# Calcul des previsions
-			Pret.get_date_pret_valide(current_dimanche,temp_somme,montant,poucentage)
+			reste = Pret.get_date_pret_valide(current_dimanche,temp_somme,montant,poucentage)
 		else :
 			current_dimanche.next()
 		# recuperer le lundi manaraka
 		lundi = current_dimanche.get_date_reel() + timedelta(days=1)
 		
 		result = Pret( id_pret=0 , date_pret=lundi , montant=montant , id_mpino=id_mpino)
+		result.reste = reste
 		return result
 
 	def valider(self):
@@ -138,6 +135,9 @@ class Pret :
 		conn = fiangoana_db.getConnection()
 		cursor = conn.cursor()
 		try :
+			cursor.execute("update Caisse set montant_actuelle = ?" , [(self.reste),])
+			date_valide = Alahady.get_closest_alahady( self.get_date_pret()).get_date_reel()
+			cursor.execute(f"update Caisse set date_pret_valide = '{date_valide}'")
 			cursor.execute(sql)
 			conn.commit()
 		except pyodbc.Error:

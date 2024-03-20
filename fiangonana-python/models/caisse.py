@@ -18,7 +18,7 @@ def get_date_dispo():
     else :
         date_dispo = datetime.strptime(row.date_pret_valide,'%Y-%m-%d')
 
-    if date_dispo.date() < datetime.now().date():
+    if date_dispo.date() <= datetime.now().date():
         date_dispo = Alahady.get_closest_alahady()
     try :
         curr = Alahady(date_reel=date_dispo.date())
@@ -41,14 +41,14 @@ def get_montant():
 def update_value( value):
     conn = DataAccess.getFiangonanaConnection()
     cursor = conn.cursor()
-    cursor.execute("update Caisse set montant_actuelle = ?" , [(value),])
+    
 
 def update_date(date_valide):
     conn = DataAccess.getFiangonanaConnection()
     cursor = conn.cursor()
     print(date_valide)
     try :
-        cursor.execute(f"update Caisse set date_pret_valide = '{date_valide}'")
+        
         conn.commit()
     except Exception:
         conn.rollback()
