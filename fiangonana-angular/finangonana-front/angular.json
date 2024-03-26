@@ -3,33 +3,11 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "fiangonana-angular": {
+    "finangonana-front": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss",
-          "skipTests": true
-        },
-        "@schematics/angular:class": {
-          "skipTests": true
-        },
-        "@schematics/angular:directive": {
-          "skipTests": true
-        },
-        "@schematics/angular:guard": {
-          "skipTests": true
-        },
-        "@schematics/angular:interceptor": {
-          "skipTests": true
-        },
-        "@schematics/angular:pipe": {
-          "skipTests": true
-        },
-        "@schematics/angular:resolver": {
-          "skipTests": true
-        },
-        "@schematics/angular:service": {
-          "skipTests": true
+          "style": "scss"
         }
       },
       "root": "",
@@ -39,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/fiangonana-angular",
+            "outputPath": "dist/finangonana-front",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -84,10 +62,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "fiangonana-angular:build:production"
+              "buildTarget": "finangonana-front:build:production"
             },
             "development": {
-              "buildTarget": "fiangonana-angular:build:development"
+              "buildTarget": "finangonana-front:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -95,7 +73,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "fiangonana-angular:build"
+            "buildTarget": "finangonana-front:build"
           }
         },
         "test": {
